@@ -25,9 +25,21 @@ struct DailySeed {
         
     }
     
-    static func offset(for date: Date, poolsize: Int) -> Int {
+    static func seed(for components: DateComponents) -> Int? {
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day else { return nil }
+
+        return year * 10_000 + month * 100 + day
+    }
+    
+    static func offset(forSeed seed: Int, poolsize: Int) -> Int {
         
-        return seed(for: date) % poolsize
+        var x = UInt64(seed)
+            x = (x ^ (x >> 30)) &* 0xbf58476d1ce4e5b9
+            x = (x ^ (x >> 27)) &* 0x94d049bb133111eb
+            x = x ^ (x >> 31)
+            return Int(x % UInt64(poolsize))
         
     }
     

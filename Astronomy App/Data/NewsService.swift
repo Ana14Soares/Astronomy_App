@@ -18,7 +18,7 @@ enum NetworkError: Error {
 
 struct NewsService {
     
-    static let poolsize = 500
+    static let poolsize = 5000
     static let windowStart = "2025-01-01T00:00:00Z"
     static let windowEnd   = "2025-12-31T23:59:59Z"
     static let minSummaryLength = 300
@@ -89,9 +89,9 @@ struct NewsService {
         
     }
     
-    func fetchArticle(for date: Date) async throws -> Article {
+    func fetchArticle(forSeed seed: Int) async throws -> Article {
         
-        let offset = DailySeed.offset(for: date, poolsize: NewsService.poolsize)
+        let offset = DailySeed.offset(forSeed: seed, poolsize: NewsService.poolsize)
         let batch = try await fetchArticles(atOffset: offset, limit: 20)
         
         guard let article = batch.first(where: {

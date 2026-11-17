@@ -13,6 +13,7 @@ import SwiftData
 final class StoredArticle {
     
     @Attribute(.unique) var id: Int
+    @Attribute(.externalStorage) var imageData: Data?
     var title: String
     var summary: String
     var url: URL
@@ -25,6 +26,7 @@ final class StoredArticle {
     
     init(
         id: Int,
+        imageData: Data? = nil,
         title: String,
         summary: String,
         url: URL,
@@ -36,6 +38,7 @@ final class StoredArticle {
         dailySeed: Int? = nil
     ){
         self.id = id
+        self.imageData = imageData
         self.title = title
         self.summary = summary
         self.url = url

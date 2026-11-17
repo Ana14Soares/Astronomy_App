@@ -19,16 +19,32 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         let window = UIWindow(windowScene: windowScene)
+        
+        let repository = ArticleRepository(context: persistence.context)
+        
+        let todayVC = ArticleViewController()
+        todayVC.repository = repository
+        todayVC.tabBarItem = UITabBarItem(title: "Today", image: UIImage(systemName: "sun.max"), tag: 0)
+        
+        let calendarVC = CalendarViewController()
+        calendarVC.repository = repository
+        calendarVC.tabBarItem = UITabBarItem(title: "Calendar", image: UIImage(systemName: "calendar"), tag: 1)
 
-        let viewController = ViewController()
-        viewController.context = persistence.context
+        let tabBar = UITabBarController()
+        tabBar.viewControllers = [
+            UINavigationController(rootViewController: todayVC),
+            UINavigationController(rootViewController: calendarVC)
+        ]
+        tabBar.delegate = self
 
-        window.rootViewController = viewController
+        window.rootViewController = tabBar
         window.makeKeyAndVisible()
 
         self.window = window
         
-        
+        Task { @MainActor in
+            try? repository.cleanUp(keepingSeed: DailySeed.seed(for: Date()))
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -62,3 +78,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 }
 
+// SceneDelegate: no fim do arquivo
+extension SceneDelegate: UITabBarControllerDelegate {
+
+    func tabBarController(_ tabBarController: UITabBarController,
+                          shouldSelect viewController: UIViewController) -> Bool {
+
+        // a aba que está saindo ainda é a selecionada neste momento
+        (tabBarController.selectedViewController as? UINavigationController)?
+            .popViewController(animated: false)
+
+        return true
+    }
+}
