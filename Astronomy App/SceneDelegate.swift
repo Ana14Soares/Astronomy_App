@@ -10,13 +10,47 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    
+    let persistence = PersistenceController()
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        
+        guard let windowScene = scene as? UIWindowScene else { return }
+
+        let window = UIWindow(windowScene: windowScene)
+        
+        let repository = ArticleRepository(context: persistence.context)
+        
+        let todayVC = ArticleViewController()
+        todayVC.repository = repository
+        todayVC.tabBarItem = UITabBarItem(title: "Article", image: UIImage(systemName: "newspaper"), tag: 0)
+        
+        let calendarVC = CalendarViewController()
+        calendarVC.repository = repository
+        calendarVC.tabBarItem = UITabBarItem(title: "Calendar", image: UIImage(systemName: "calendar"), tag: 1)
+        
+        let favoritesVC = FavoritesViewController()
+        favoritesVC.repository = repository
+        favoritesVC.tabBarItem = UITabBarItem(title: "Favorites", image: UIImage(systemName: "star"), tag: 1)
+
+        let tabBar = UITabBarController()
+        tabBar.viewControllers = [
+            UINavigationController(rootViewController: calendarVC),
+            UINavigationController(rootViewController: todayVC),
+            UINavigationController(rootViewController: favoritesVC)
+        ]
+        tabBar.selectedIndex = 1
+        tabBar.delegate = self
+
+        window.rootViewController = tabBar
+        window.makeKeyAndVisible()
+
+        self.window = window
+        
+        Task { @MainActor in
+            try? repository.cleanUp(keepingSeed: DailySeed.seed(for: Date()))
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -50,3 +84,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 }
 
+// SceneDelegate: no fim do arquivo
+extension SceneDelegate: UITabBarControllerDelegate {
+
+    func tabBarController(_ tabBarController: UITabBarController,
+                          shouldSelect viewController: UIViewController) -> Bool {
+
+        // a aba que está saindo ainda é a selecionada neste momento
+        (tabBarController.selectedViewController as? UINavigationController)?
+            .popViewController(animated: false)
+
+        return true
+    }
+}
