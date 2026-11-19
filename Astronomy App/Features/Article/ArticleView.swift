@@ -23,7 +23,7 @@ final class ArticleView: UIView {
 
    
     private lazy var stack = UIStackView(arrangedSubviews: [
-        imageView, titleLabel, sourceLabel, summaryLabel, linkButton
+        imageView, titleLabel, summaryLabel, sourceLabel, linkButton
     ])
     
     private lazy var errorStack = UIStackView(arrangedSubviews: [errorLabel, retryButton])

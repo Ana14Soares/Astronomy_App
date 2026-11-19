@@ -88,4 +88,13 @@ final class ArticleRepository {
         try? context.save()
     }
     
+    func favorites() throws -> [StoredArticle]{
+        let descriptor = FetchDescriptor<StoredArticle>(
+            predicate: #Predicate { $0.isFavorite == true },
+            sortBy: [SortDescriptor(\.publishedAt, order: .forward)]
+        )
+        
+        return try context.fetch(descriptor)
+    }
+    
 }

@@ -12,9 +12,14 @@ final class ArticleViewController: UIViewController {
     
     var repository: ArticleRepository!
     var seed: Int = DailySeed.seed(for: Date())
+    var preloadedArticle: StoredArticle?
     
     private let articleView = ArticleView()
     private var currentArticle: StoredArticle?
+    
+    private var displaySeed: Int? {
+        preloadedArticle?.dailySeed ?? seed
+    }
     
     override func loadView() {
         view = articleView
@@ -26,6 +31,9 @@ final class ArticleViewController: UIViewController {
         articleView.onOpenLink = { [weak self] in self?.openArticle() }
         articleView.onRetry    = { [weak self] in self?.loadContent() }
         
+        if let displaySeed {
+            title = DateText.title(forSeed: displaySeed)
+        }
         loadContent()
         updateFavoriteButton()
         
@@ -33,17 +41,29 @@ final class ArticleViewController: UIViewController {
     
     private func loadContent(){
         articleView.render(.loading)
+        
+        if let article = preloadedArticle {
+            show(article)
+            return
+        }
+        
         Task {
             do {
+                
                 let article = try await repository.article(forSeed: seed)
-                currentArticle = article
-                updateFavoriteButton()
-                articleView.render(.loaded(article, image(for: article)))
+                show(article)
+                
             } catch {
                 articleView.render(.failed("Could not load the article"))
                 print("Erro:", error)
             }
         }
+    }
+    
+    private func show(_ article: StoredArticle) {
+        currentArticle = article
+        updateFavoriteButton()
+        articleView.render(.loaded(article, image(for: article)))
     }
     
     private func image(for article: StoredArticle) -> UIImage? {
@@ -63,8 +83,11 @@ final class ArticleViewController: UIViewController {
             self?.favoriteTapped()
         }
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(primaryAction: action)
-        navigationItem.rightBarButtonItem?.isEnabled = (currentArticle != nil)
+        let item = UIBarButtonItem(primaryAction: action)
+            item.tintColor = .systemBlue
+            item.isEnabled = (currentArticle != nil)
+
+            navigationItem.rightBarButtonItem = item
     }
     
     private func favoriteTapped(){

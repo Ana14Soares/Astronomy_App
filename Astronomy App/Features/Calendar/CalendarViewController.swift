@@ -12,6 +12,7 @@ final class CalendarViewController: UIViewController {
     
     private let calendarView = UICalendarView()
     var repository: ArticleRepository!
+    private var selection: UICalendarSelectionSingleDate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,6 +21,11 @@ final class CalendarViewController: UIViewController {
         
         setupCalendar() 
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        selection?.setSelected(nil, animated: false)
     }
     
     private func setupCalendar(){
@@ -41,6 +47,7 @@ final class CalendarViewController: UIViewController {
         
         let selection = UICalendarSelectionSingleDate(delegate: self)
         calendarView.selectionBehavior = selection
+        self.selection = selection
     }
     
 }

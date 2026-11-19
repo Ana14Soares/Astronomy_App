@@ -43,4 +43,12 @@ struct DailySeed {
         
     }
     
+    static func components(fromSeed seed: Int) -> DateComponents {
+        DateComponents(
+            year: seed / 10000,
+            month: (seed / 100) % 100,
+            day: seed % 100
+        )
+    }
+    
 }

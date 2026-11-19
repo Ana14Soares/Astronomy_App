@@ -24,17 +24,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let todayVC = ArticleViewController()
         todayVC.repository = repository
-        todayVC.tabBarItem = UITabBarItem(title: "Today", image: UIImage(systemName: "sun.max"), tag: 0)
+        todayVC.tabBarItem = UITabBarItem(title: "Article", image: UIImage(systemName: "newspaper"), tag: 0)
         
         let calendarVC = CalendarViewController()
         calendarVC.repository = repository
         calendarVC.tabBarItem = UITabBarItem(title: "Calendar", image: UIImage(systemName: "calendar"), tag: 1)
+        
+        let favoritesVC = FavoritesViewController()
+        favoritesVC.repository = repository
+        favoritesVC.tabBarItem = UITabBarItem(title: "Favorites", image: UIImage(systemName: "star"), tag: 1)
 
         let tabBar = UITabBarController()
         tabBar.viewControllers = [
+            UINavigationController(rootViewController: calendarVC),
             UINavigationController(rootViewController: todayVC),
-            UINavigationController(rootViewController: calendarVC)
+            UINavigationController(rootViewController: favoritesVC)
         ]
+        tabBar.selectedIndex = 1
         tabBar.delegate = self
 
         window.rootViewController = tabBar
